@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ইবাদত হাব প্রো - ২০২৬</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --primary: #0b666a; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --accent: #f39c12; }
+        .dark-mode { --bg: #0f172a; --card: #1e293b; --primary: #2dd4bf; --text: #f1f5f9; }
+        * { box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; transition: 0.3s; }
+        body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; padding-bottom: 120px; }
+
+        /* Header & Dashboard */
+        .header { background: var(--primary); color: white; padding: 40px 20px 60px; text-align: center; border-radius: 0 0 40px 40px; }
+        .coin-badge { background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid gold; margin-top: 10px; font-weight: bold; font-size: 20px; }
+        .dashboard { padding: 0 20px; margin-top: -30px; }
+        .ramadan-timer { background: linear-gradient(45deg, #f39c12, #e67e22); color: white; text-align: center; padding: 15px; border-radius: 20px; box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3); }
+
+        /* Grid Layout */
+        .grid { padding: 10px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { background: var(--card); border-radius: 20px; padding: 18px; text-align: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
+        .card i { font-size: 32px; color: var(--primary); margin-bottom: 8px; display: block; }
+        .special-card { background: linear-gradient(135deg, #1e5128, #0b666a); color: white; grid-column: span 2; border: 2px solid gold; animation: pulse 2s infinite; }
+
+        /* Pages */
+        .page { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 3000; }
+        .page.active { display: flex; }
+        .page-head { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: var(--card); }
+        .page-body { padding: 20px; overflow-y: auto; flex: 1; line-height: 1.8; }
+
+        /* Amol Box */
+        .amol-box { background: var(--card); padding: 18px; border-radius: 15px; margin-bottom: 15px; border-left: 6px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .amol-box h3 { margin: 0 0 10px 0; color: var(--primary); font-size: 19px; border-bottom: 1px dashed #ddd; padding-bottom: 5px; }
+
+        /* Player Bar */
+        #playerBar { position: fixed; bottom: 0; width: 100%; background: var(--primary); color: white; padding: 15px 20px; display: none; align-items: center; gap: 15px; z-index: 4000; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); }
+        .play-btn { background: white; color: var(--primary); border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* Quiz Styles */
+        .quiz-option { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #ddd; cursor: pointer; display: block; width: 100%; text-align: left; font-size: 16px; transition: 0.2s; }
+        .quiz-option:active { transform: scale(0.98); background: #f0fdfa; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:10px;">
+        <span>৩ ফেব্রুয়ারি, ২০২৬</span>
+        <i class="ri-moon-line" onclick="document.body.classList.toggle('dark-mode')" style="cursor:pointer"></i>
+    </div>
+    <h2 style="margin:0">ইবাদত হাব প্রো</h2>
+    <div class="coin-badge"><i class="ri-copper-coin-fill" style="color: gold;"></i> <span id="coinVal">300</span></div>
+</div>
+
+<div class="dashboard">
+    <div class="ramadan-timer">
+        <div id="countdown" style="font-size: 18px; font-weight: bold;">লোড হচ্ছে...</div>
+        <small>পবিত্র রমজান কাউন্টডাউন</small>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card special-card" id="sbCard" onclick="openBigAmol()">
+        <i class="ri-moon-clear-fill"></i>
+        <strong>শবে বরাত গাইড</strong>
+        <p style="font-size:11px;">আজ রাতের বিশেষ আমল ও নিয়মাবলি</p>
+    </div>
+
+    <div class="card" onclick="openPrayerTimes()"><i class="ri-time-line"></i><span>নামাজের সময়</span></div>
+    <div class="card" onclick="openDua()"><i class="ri-chat-smile-3-line"></i><span>প্রয়োজনীয় দোয়া</span></div>
+    <div class="card" onclick="renderSurahs()"><i class="ri-play-circle-fill"></i><span>১১৪ সূরা অডিও</span></div>
+    <div class="card" onclick="openQuiz()"><i class="ri-question-answer-line"></i><span>৩০টি কুইজ</span></div>
+    <div class="card" onclick="openSunnah()"><i class="ri-heart-line"></i><span>বড় সুন্নাত আমল</span></div>
+    <div class="card" onclick="openTasbih()"><i class="ri-fingerprint-line"></i><span>তসবিহ</span></div>
+</div>
+
+<div id="playerBar">
+    <div style="flex: 1; overflow: hidden;">
+        <div id="playingName" style="font-weight: bold; font-size: 14px; white-space: nowrap; text-overflow: ellipsis;">সূরা ফাতিহা</div>
+        <small id="playStatus">স্বয়ংক্রিয় প্লে চলছে...</small>
+    </div>
+    <button class="play-btn" onclick="toggleAudio()"><i id="mPlayIcon" class="ri-pause-line"></i></button>
+    <i class="ri-close-line" style="font-size: 24px; cursor:pointer;" onclick="closePlayer()"></i>
+</div>
+
+<audio id="mainAudio"></audio>
+
+<div class="page" id="page">
+    <div class="page-head"><h3 id="pTitle" style="margin:0"></h3><span onclick="closePage()" style="font-size: 28px; cursor:pointer;">✕</span></div>
+    <div class="page-body" id="pBody"></div>
+</div>
+
+<script>
+let currentSurahIndex = 0;
+let coins = parseInt(localStorage.getItem('coins')) || 300;
+const audio = document.getElementById('mainAudio');
+const surahList = ["ফাতিহা", "বাকারা", "আলে ইমরান", "নিসা", "মায়িদাহ", "আন'আম", "আ'রাফ", "আনফাল", "তাওবাহ", "ইউনূস", "হূদ", "ইউসুফ", "রা'দ", "ইব্রাহিম", "হিজর", "নাহল", "ইসরা", "কাহফ", "মারইয়াম", "ত্বোয়া-হা", "আম্বিয়া", "হাজ্জ", "মুমিনূন", "নূর", "ফুরকান", "শু'আরা", "নামল", "কাসাস", "আনকাবূত", "রূম", "লুকমান", "সাজদাহ", "আহযাব", "সাবা", "ফাতির", "ইয়াসীন", "সাফফাত", "সোয়াদ", "যুমার", "গাফির", "ফুসসিলাত", "শূরা", "যুখরুফ", "দুখান", "জাসিয়াহ", "আহক্বাফ", "মুহাম্মদ", "ফাতহ", "হুজুরাত", "ক্বাফ", "যারিয়াত", "তূর", "নাজম", "ক্বামার", "রাহমান", "ওয়াক্বি'আহ", "হাদীদ", "মুজাদালাহ", "হাশর", "মুমতাহিনাহ", "সাফ", "জুমু'আহ", "মুনাফিকূন", "তাগাবুন", "ত্বালাক্ব", "তাহরীম", "মুলক", "ক্বলম", "হাক্বক্বাহ", "মা'আরিজ", "নূহ", "জীন", "মুযযামমিল", "মুদ্দাসসির", "ক্বিয়ামাহ", "ইনসান", "মুরসালাত", "নাবা", "নাযি'আত", "আবাসা", "তাকবীর", "ইনফিতার", "মুতাফফিফীন", "ইনশিক্বাক্ব", "বুরূজ", "তারিক্ব", "আ'লা", "গাশিয়াহ", "ফজর", "বালাদ", "শামস", "লাইল", "যুহা", "ইনশিরাহ", "তীন", "আলাক্ব", "ক্বদর", "বাইয়্যিনাহ", "যিলযাল", "আদিয়াত", "ক্বারি'আহ", "তাকাসুর", "আসর", "হুমাযাহ", "ফীল", "কুরাইশ", "মাউন", "কাওসার", "কাফিরূন", "নাসর", "লাহাব", "ইখলাস", "ফালাক্ব", "নাস"];
+
+const quizData = [
+    {q: "কুরআনের সবথেকে বড় সূরা কোনটি?", a: ["ইখলাস", "বাকারা", "ফুরকান", "নাস"], c: 1},
+    {q: "জান্নাতের চাবি কোনটি?", a: ["হজ", "নামাজ", "দান", "সালাম"], c: 1},
+    {q: "ইসলামের স্তম্ভ কয়টি?", a: ["৩টি", "৫টি", "৭টি", "১০টি"], c: 1},
+    {q: "কুরআনের হৃদয় বলা হয় কোন সূরাকে?", a: ["রাহমান", "মুলক", "ইয়াসিন", "কাহফ"], c: 2},
+    {q: "প্রথম নবী কে ছিলেন?", a: ["মুসা (আ:)", "আদম (আ:)", "নূহ (আ:)", "লুত (আ:)"], c: 1},
+    {q: "আল্লাহর ঘর বলা হয় কোনটিকে?", a: ["মসজিদ", "কাবা শরিফ", "মাদ্রাসা", "আকাশ"], c: 1},
+    {q: "হজ কোন মাসে পালিত হয়?", a: ["রমজান", "শাওয়াল", "জিলহজ", "মুহররম"], c: 2},
+    {q: "সবথেকে ছোট সূরা কোনটি?", a: ["নাস", "কাওসার", "ফীল", "আসর"], c: 1},
+    {q: "কুরআন কত বছরে নাজিল হয়?", a: ["১০ বছর", "১৫ বছর", "২৩ বছর", "৩০ বছর"], c: 2},
+    {q: "রমজান মাসের প্রধান আমল কোনটি?", a: ["হজ", "রোজা", "জাকাত", "কুরবানি"], c: 1}
+    // ৩০টি কুইজের জন্য এখানে প্রশ্ন যোগ করা যাবে। স্যাম্পল হিসেবে ১০টি দেওয়া হলো।
+];
+
+// ১. সঠিক নামাজের সময় (৩ ফেব্রুয়ারি, ২০২৬ - ঢাকা অনুযায়ী)
+function openPrayerTimes() {
+    let html = `
+        <div class="amol-box">
+            <h3>🕒 ৩ ফেব্রুয়ারি ২০২৬ নামাজের সময়</h3>
+            <p>🌅 ফজর: ৫:১৬ মিনিট</p>
+            <p>☀️ যোহর: ১২:১২ মিনিট</p>
+            <p>🌥 আসর: ৪:১৫ মিনিট</p>
+            <p>🌇 মাগরিব: ৫:৪৭ মিনিট</p>
+            <p>🌃 এশা: ৭:০২ মিনিট</p>
+            <p style="font-size:12px; color:gray; margin-top:10px;">* ঢাকা ও এর আশেপাশের এলাকার জন্য।</p>
+        </div>
+    `;
+    showPage("সঠিক নামাজের সময়", html);
+}
+
+// ২. প্রয়োজনীয় দোয়া
+function openDua() {
+    let html = `
+        <div class="amol-box">
+            <h3>🏠 ঘর থেকে বের হওয়ার দোয়া</h3>
+            <p>বিসমিল্লাহি তাওয়াক্কালতু আলাল্লাহি ওয়া লা হাওলা ওয়া লা কুয়্যাতা ইল্লা বিল্লাহ।</p>
+        </div>
+        <div class="amol-box">
+            <h3>🍽 খাবারের শুরুর দোয়া</h3>
+            <p>বিসমিল্লাহি ওয়া আলা বারাকাতিল্লাহ।</p>
+        </div>
+        <div class="amol-box">
+            <h3>🌙 ঘুমানোর আগের দোয়া</h3>
+            <p>আল্লাহুম্মা বিসমিকা আমুতু ওয়া আহ্ইয়া।</p>
+        </div>
+        <div class="amol-box">
+            <h3>🧼 ওযুর পরের দোয়া</h3>
+            <p>আশহাদু আল্লা ইলাহা ইল্লাল্লাহু ওয়াহদাহু লা শারিকা লাহু ওয়া আশহাদু আন্না মুহাম্মাদান আবদুহু ওয়া রাসুলুহু।</p>
+        </div>
+    `;
+    showPage("প্রয়োজনীয় দোয়া ও যিকির", html);
+}
+
+// ৩. বড় সুন্নাত আমল
+function openSunnah() {
+    let html = `
+        <div class="amol-box">
+            <h3>🛌 ঘুমানোর বিস্তারিত সুন্নাত</h3>
+            <p>১. ওযু করে শোয়া। ২. বিছানা ৩ বার ঝেড়ে নেওয়া। ৩. ডান কাতে শোয়া। ৪. সূরা ইখলাস, ফালাক ও নাস ৩ বার পড়ে শরীর মুছে নেওয়া।</p>
+        </div>
+        <div class="amol-box">
+            <h3>🕌 মসজিদে প্রবেশের সুন্নাত</h3>
+            <p>১. বিসমিল্লাহ বলা। ২. দুরুদ শরিফ পড়া। ৩. ডান পা আগে রাখা। ৪. মসজিদে প্রবেশের দোয়া পড়া।</p>
+        </div>
+        <div class="amol-box">
+            <h3>🚿 ওযুর সুন্নাতসমূহ</h3>
+            <p>১. বিসমিল্লাহ বলা। ২. মেসওয়াক করা। ৩. কবজি পর্যন্ত দুই হাত ধোয়া। ৪. নাকে ও মুখে পানি দেওয়া।</p>
+        </div>
+    `;
+    showPage("বড় সুন্নাত আমলসমূহ", html);
+}
+
+// ৪. কুইজ সিস্টেম
+let qIdx = 0;
+function openQuiz() {
+    if(qIdx >= quizData.length) qIdx = 0;
+    let q = quizData[qIdx];
+    let html = `<h2 style="text-align:center">${qIdx + 1}/${quizData.length}</h2><p style="font-size:18px; font-weight:bold; margin-bottom:20px;">${q.q}</p>`;
+    q.a.forEach((opt, i) => {
+        html += `<button class="quiz-option" onclick="checkQ(${i}, ${q.c})">${opt}</button>`;
+    });
+    showPage("ইসলামিক কুইজ", html);
+}
+
+function checkQ(selected, correct) {
+    if(selected === correct) {
+        addCoins(20);
+        confetti();
+        qIdx++;
+        setTimeout(openQuiz, 1000);
+    } else { alert("ভুল উত্তর! আবার চেষ্টা করুন।"); }
+}
+
+// অডিও সূরা প্লেয়ার
+function renderSurahs() {
+    let list = `<p style="text-align:center; color:var(--primary); font-size:13px;">অটো-নেক্সট সূরা প্লেয়ার। একটি শেষ হলে পরেরটি শুরু হবে।</p>`;
+    surahList.forEach((s, i) => {
+        list += `<div class="amol-box" onclick="playS(${i})" style="display:flex; justify-content:space-between; cursor:pointer; align-items:center;">
+            <span>${i+1}. সূরা ${s}</span> <i class="ri-play-circle-fill" style="font-size:24px; color:var(--primary);"></i>
+        </div>`;
+    });
+    showPage("১১৪ সূরা অডিও", list);
+}
+
+function playS(i) {
+    currentSurahIndex = i;
+    document.getElementById('playingName').innerText = "সূরা " + surahList[i];
+    audio.src = `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${i + 1}.mp3`;
+    audio.play();
+    document.getElementById('playerBar').style.display = 'flex';
+    document.getElementById('mPlayIcon').className = 'ri-pause-line';
+
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'সূরা ' + surahList[i],
+            artist: 'মিশারি রশিদ আল-আফাসি',
+            album: 'আল-কুরআন'
+        });
+    }
+}
+
+audio.onended = function() {
+    if (currentSurahIndex < 113) { playS(currentSurahIndex + 1); addCoins(10); }
+    else { closePlayer(); }
+};
+
+function toggleAudio() {
+    if (audio.paused) { audio.play(); document.getElementById('mPlayIcon').className = 'ri-pause-line'; }
+    else { audio.pause(); document.getElementById('mPlayIcon').className = 'ri-play-line'; }
+}
+
+// গ্লোবাল ফাংশন
+function openBigAmol() {
+    showPage("শবে বরাত গাইড", `<div class="amol-box"><h3>🌙 শবে বরাতের আমল</h3><p>১. নফল নামাজ: ২ রাকাত করে ১২ রাকাত পর্যন্ত। ২. দোয়া ও তওবা। ৩. সূরা ইয়াসিন পাঠ। ৪. মৃতদের জন্য কবর জিয়ারত ও দোয়া।</p></div>`);
+}
+function openTasbih() {
+    showPage("তসবিহ কাউন্টার", `<div style="text-align:center"><h1 id="tVal" style="font-size:70px; margin:20px 0;">0</h1><button onclick="document.getElementById('tVal').innerText++; addCoins(1)" class="play-btn" style="width:120px; height:120px; margin:auto; font-size:30px;"><i class="ri-fingerprint-line"></i></button><p style="margin-top:20px;">জিকির করুন ও কয়েন জিতেন</p></div>`);
+}
+function addCoins(n) { coins += n; document.getElementById('coinVal').innerText = coins; localStorage.setItem('coins', coins); }
+function showPage(t, b) { document.getElementById('pTitle').innerText = t; document.getElementById('pBody').innerHTML = b; document.getElementById('page').classList.add('active'); }
+function closePage() { document.getElementById('page').classList.remove('active'); }
+function closePlayer() { audio.pause(); document.getElementById('playerBar').style.display = 'none'; }
+
+// ইনিশিয়ালাইজেশন
+const ramadanDate = new Date('March 1, 2026');
+const diff = ramadanDate - new Date();
+document.getElementById('countdown').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)) + " দিন বাকি";
+if (new Date() > new Date('2026-02-04T10:00:00')) document.getElementById('sbCard').style.display = 'none';
+document.getElementById('coinVal').innerText = coins;
+</script>
+  <script>
+  atOptions = {
+    'key' : 'ca0abad8be34d62d48c19d91cf7c102e',
+    'format' : 'iframe',
+    'height' : 50,
+    'width' : 320,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/ca0abad8be34d62d48c19d91cf7c102e/invoke.js"></script>
+</body>
+</html>
